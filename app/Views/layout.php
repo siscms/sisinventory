@@ -18,6 +18,7 @@
   <link href="assets/css/datatables.min.css" rel="stylesheet" />
   <!-- CSS Just for demo purpose, don't include it in your project -->
   <link href="assets/demo/demo.css" rel="stylesheet" />
+  <script src="../assets/js/core/jquery.min.js"></script>
 </head>
 
 <body class="">
@@ -135,7 +136,6 @@
     </div>
   </div>
   <!--   Core JS Files   -->
-  <script src="../assets/js/core/jquery.min.js"></script>
   <script src="../assets/js/core/popper.min.js"></script>
   <script src="../assets/js/core/bootstrap-material-design.min.js"></script>
   <script src="../assets/js/datatables.min.js"></script>

@@ -13,6 +13,23 @@
                     <button class="btn btn-success btn-round float-right" data-toggle="modal" data-target="#addModal">
                         <i class="material-icons">add_circle_outline</i> Tambah baru
                     </button>
+                    <br>
+                    <?php if (session()->getFlashdata('success')) : ?>
+                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                            <strong><?= session()->getFlashdata('success') ?></strong>
+                            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                    <?php endif; ?>
+                    <?php if (session()->getFlashdata('failed')) : ?>
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <strong><?= session()->getFlashdata('failed') ?></strong>
+                            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                    <?php endif; ?>
                 </div>
                 <div class="card-body table-responsive">
                     <table class="table table-hover datatablesInit">
@@ -35,7 +52,7 @@
                                     <td>
                                         <button type="button" class="btn btn-sm btn-info">Detail</button>
                                         <button type="button" class="btn btn-sm btn-warning">Edit</button>
-                                        <button type="button" class="btn btn-sm btn-danger">Hapus</button>
+                                        <button type="button" class="btn btn-sm btn-danger" onclick="onBtnDelete(<?= $item['item_id'] ?>)">Hapus</button>
                                     </td>
                                 </tr>
                             <?php endforeach; ?>
@@ -48,17 +65,18 @@
             <div class="modal fade bd-example-modal-lg" id="addModal" tabindex="-1" role="dialog" aria-hidden="true">
                 <div class="modal-dialog modal-lg" role="document">
                     <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title" id="exampleModalLabel">Tambah barang baru</h5>
-                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                <span aria-hidden="true">&times;</span>
-                            </button>
-                        </div>
-                        <div class="modal-body">
-                            <form>
+                        <form action="/item/add" method="POST" id="itemAdd">
+                            <?= csrf_field() ?>
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="exampleModalLabel">Tambah barang baru</h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div class="modal-body">
                                 <div class="form-group">
                                     <label>Nama Barang</label>
-                                    <input type="item_name" required class="form-control" placeholder="Masukkan nama barang">
+                                    <input name="item_name" type="text" required class="form-control" placeholder="Masukkan nama barang">
                                 </div>
                                 <div class="fileinput fileinput-new text-center" data-provides="fileinput">
                                     <div class="fileinput-new thumbnail img-raised">
@@ -68,7 +86,7 @@
                                         <span class="btn btn-raised btn-round btn-default btn-file">
                                             <span class="fileinput-new">Select image</span>
                                             <span class="fileinput-exists">Change</span>
-                                            <input type="file" id="file" accept="image/x-png,image/jpeg" onchange="Filevalidation()" name="..." />
+                                            <input type="file" id="file" accept="image/x-png,image/jpeg" onchange="Filevalidation()" name="item_image" />
                                         </span>
                                         <a href="#pablo" class="btn btn-danger btn-round fileinput-exists" data-dismiss="fileinput"><i class="fa fa-times"></i> Remove</a>
                                     </div>
@@ -76,44 +94,76 @@
                                 <br>
                                 <div class="row">
                                     <div class="col">
-                                        <input type="number" required class="form-control" placeholder="Harga beli barang">
+                                        <input name="item_purchase_price" type="number" required class="form-control" placeholder="Harga beli barang">
                                     </div>
                                     <div class="col">
-                                        <input type="number" required class="form-control" placeholder="Harga jual barang">
+                                        <input name="item_selling_price" type="number" required class="form-control" placeholder="Harga jual barang">
                                     </div>
                                     <div class="col">
-                                        <input type="number" required class="form-control" placeholder="Stok">
+                                        <input name="item_stock" type="number" required class="form-control" placeholder="Stok">
                                     </div>
                                 </div>
-                            </form>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
-                            <button type="button" class="btn btn-success">Simpan</button>
-                        </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
+                                <button type="submit" class="btn btn-success" id="btnSave">Simpan</button>
+                            </div>
+                        </form>
                     </div>
+                </div>
+            </div>
+
+            <!-- Modal -->
+            <div class="modal" id="deleteModal" role="dialog">
+                <div class="modal-dialog" role="document">
+                    <form action="/item/delete" method="POST">
+                        <?= csrf_field() ?>
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="exampleModalLabel">Hapus Barang</h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div class="modal-body">
+                                <p>Apakah anda yakin akan menghapus data ini?</p>
+                                <input type="hidden" name="id" id="idDelete" value="">
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
+                                <button type="submit" class="btn btn-danger">Ya, Hapus</button>
+                            </div>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
     </div>
-    <script> 
-    Filevalidation = () => { 
-        var fi = document.getElementById('file'); 
-        // Check if any file is selected. 
-        if (fi.files.length > 0) { 
-            for (const i = 0; i <= fi.files.length - 1; i++) { 
-  
-                const fsize = fi.files.item(i).size; 
-                const file = Math.round((fsize / 1024)); 
-                // The size of the file. 
-                if (file >= 100) { 
-                    alert( 
-                      "File too Big, please select a file less than 100 Kb"); 
-                      $('#file').val('')
-                } 
-            } 
-        } 
-    } 
-</script>
+    <script>
+        onBtnDelete = (id) => {
+            console.log(id);
+
+            $('#idDelete').val(id)
+            $('#deleteModal').modal({backdrop: true})
+        }
+
+        Filevalidation = () => {
+            var fi = document.getElementById('file');
+            // Check if any file is selected. 
+            if (fi.files.length > 0) {
+                for (const i = 0; i <= fi.files.length - 1; i++) {
+
+                    const fsize = fi.files.item(i).size;
+                    const file = Math.round((fsize / 1024));
+                    // The size of the file. 
+                    if (file >= 100) {
+                        alert(
+                            "File too Big, please select a file less than 100 Kb");
+                        $('#file').val('')
+                    }
+                }
+            }
+        }
+    </script>
 </div>
 <?= $this->endSection(); ?>

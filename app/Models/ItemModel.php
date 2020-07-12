@@ -6,6 +6,7 @@ class ItemModel extends Model
 {
     protected $table = 'items';
     protected $primaryKey = 'item_id';
+    protected $allowedFields = ['item_name', 'item_image', 'item_purchase_price', 'item_selling_price', 'item_stock'];
  
     public function saveItem($data){
         $query = $this->db->table('items')->insert($data);
