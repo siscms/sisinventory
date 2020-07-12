@@ -24,7 +24,7 @@
                     <?php endif; ?>
                     <?php if (session()->getFlashdata('failed')) : ?>
                         <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                            <strong><?= session()->getFlashdata('failed') ?></strong>
+                            <strong><?= $validation->listErrors() ?></strong>
                             <button type="button" class="close" data-dismiss="alert" aria-label="Close">
                                 <span aria-hidden="true">&times;</span>
                             </button>
@@ -42,15 +42,17 @@
                             <th>Aksi</th>
                         </thead>
                         <tbody>
-                            <?php foreach ($items as $item) : ?>
+                            <?php foreach ($items as $item) :
+                                $dataItem = implode("','", $item);
+                            ?>
                                 <tr>
                                     <td><?= $item['item_name'] ?></td>
-                                    <td><img src="<?= $item['item_image'] ?>" alt=""></td>
+                                    <td><img src="/uploads/<?= $item['item_image'] ?>" width="150" height="100" alt=""></td>
                                     <td><?= $item['item_purchase_price'] ?></td>
                                     <td><?= $item['item_selling_price'] ?></td>
                                     <td><?= $item['item_stock'] ?></td>
                                     <td>
-                                        <button type="button" class="btn btn-sm btn-info">Detail</button>
+                                        <button type="button" class="btn btn-sm btn-info" onclick="onBtnDetail('<?= $dataItem; ?>')">Detail</button>
                                         <button type="button" class="btn btn-sm btn-warning">Edit</button>
                                         <button type="button" class="btn btn-sm btn-danger" onclick="onBtnDelete(<?= $item['item_id'] ?>)">Hapus</button>
                                     </td>
@@ -65,7 +67,7 @@
             <div class="modal fade bd-example-modal-lg" id="addModal" tabindex="-1" role="dialog" aria-hidden="true">
                 <div class="modal-dialog modal-lg" role="document">
                     <div class="modal-content">
-                        <form action="/item/add" method="POST" id="itemAdd">
+                        <form action="/item/add" method="POST" id="itemAdd" enctype="multipart/form-data">
                             <?= csrf_field() ?>
                             <div class="modal-header">
                                 <h5 class="modal-title" id="exampleModalLabel">Tambah barang baru</h5>
@@ -114,7 +116,47 @@
             </div>
 
             <!-- Modal -->
-            <div class="modal" id="deleteModal" role="dialog">
+            <div class="modal fade bd-example-modal-lg" id="detailModal" tabindex="-1" role="dialog" aria-hidden="true">
+                <div class="modal-dialog modal-lg" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="exampleModalLabel">Detail barang</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <h2 id="dataName"></h2>
+                            <img id="dataImage" class="img-rounded img-thumbnail" src="/uploads/<?= $item['item_image'] ?>" alt="">
+                            <table class="table table-hover datatablesInit">
+                                <tbody class="text-info">
+                                    <tr>
+                                        <td><strong>Harga Beli</strong></td>
+                                        <td></td>
+                                        <td id="dataPurchasePrice"></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Harga Jual</strong></td>
+                                        <td></td>
+                                        <td id="dataSellingPrice"></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Stok</strong></td>
+                                        <td></td>
+                                        <td id="dataStock"></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modal -->
+            <div class="modal fade" id="deleteModal" role="dialog">
                 <div class="modal-dialog" role="document">
                     <form action="/item/delete" method="POST">
                         <?= csrf_field() ?>
@@ -141,10 +183,21 @@
     </div>
     <script>
         onBtnDelete = (id) => {
-            console.log(id);
 
             $('#idDelete').val(id)
-            $('#deleteModal').modal({backdrop: true})
+            $('#deleteModal').modal({
+                backdrop: true
+            })
+        }
+
+        onBtnDetail = (id, name, image, purchase_price, selling_price, stock) => {
+
+            $('#dataName').html(name)
+            $('#dataPurchasePrice').html(purchase_price)
+            $('#dataSellingPrice').html(selling_price)
+            $('#dataStock').html(stock)
+            $('#dataImage').attr('src', '/uploads/'+image);
+            $('#detailModal').modal("show")
         }
 
         Filevalidation = () => {
